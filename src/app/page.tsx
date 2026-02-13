@@ -1,65 +1,170 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Image from "next/image";
+import { useState } from "react";
+
+export default function HomePage() {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "radial-gradient(circle at center, #111 0%, #000 70%)",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ textAlign: "center", maxWidth: 980, width: "100%" }}>
+        {/* 3D space */}
+        <div
+          style={{
+            perspective: "1200px",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {/* Constant elegant 3D spin */}
+          <div
+            style={{
+              transformStyle: "preserve-3d",
+              animation: "spin3d 16s linear infinite, breatheGlow 3.6s ease-in-out infinite",
+              willChange: "transform",
+            }}
           >
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/logo.png"
+              alt="Edge & Essence Hair Studio"
+              width={800}
+              height={800}
+              priority
+              style={{
+                width: "min(520px, 85vw)",
+                height: "auto",
+                display: "block",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                filter: "drop-shadow(0 0 28px rgba(212,175,55,0.22))",
+              }}
             />
-            Deploy Now
-          </a>
+          </div>
+        </div>
+
+        {/* Divider line */}
+        <div
+          style={{
+            height: 1,
+            width: "min(560px, 82vw)",
+            margin: "4px auto 0",
+            background:
+              "linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.7) 40%, rgba(212,175,55,0.7) 60%, rgba(212,175,55,0) 100%)",
+            opacity: 0.9,
+          }}
+        />
+
+        <h1
+          style={{
+            marginTop: 6,
+            marginBottom: 10,
+            letterSpacing: 10,
+            color: "#d4af37",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: 34,
+            fontWeight: 500,
+          }}
+        >
+          COMING SOON
+        </h1>
+
+        <p
+          style={{
+            margin: 0,
+            color: "#caa64a",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: 18,
+            opacity: 0.9,
+          }}
+        >
+          Luxury Braiding & Natural Hair Studio
+        </p>
+
+        <p
+          style={{
+            marginTop: 12,
+            marginBottom: 0,
+            color: "rgba(212, 175, 55, 0.85)",
+            fontFamily: "Gerogia, 'Times New Roman', serif",
+            fontSize: 16,
+            letterSpacing: 1.5,
+          }}
+        >
+          Park Place Mall
+        </p>
+
+        <p
+          style={{
+            marginTop: 10,
+            marginBottom: 0,
+            color: "rgba(212,175,55,0.65)",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: 14,
+            letterSpacing: 1.2,
+          }}
+        >
+          Tucson, Arizona
+        </p>
+
+        <div style={{ marginTop: 34, display: "flex", justifyContent: "center" }}>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://instagram.com/edgeandessencetucson"
             target="_blank"
             rel="noopener noreferrer"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+              padding: "14px 30px",
+              borderRadius: 999,
+              border: "1px solid rgba(212,175,55,0.75)",
+              color: hovered ? "#000" : "rgba(212,175,55,0.95)",
+              background: hovered ? "rgba(212,175,55,0.95)" : "transparent",
+              textDecoration: "none",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              letterSpacing: 2.4,
+              fontSize: 13,
+              transition: "all 420ms ease",
+              boxShadow: hovered ? "0 10px 30px rgba(212,175,55,0.18)" : "none",
+            }}
           >
-            Documentation
+            FOLLOW ON INSTAGRAM
           </a>
         </div>
-      </main>
-    </div>
+
+        <style jsx>{`
+          @keyframes spin3d {
+            0% {
+              transform: rotateY(0deg) rotateX(0deg);
+            }
+            100% {
+              transform: rotateY(360deg) rotateX(0deg);
+            }
+          }
+
+          @keyframes breatheGlow {
+            0% {
+              filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.14));
+            }
+            50% {
+              filter: drop-shadow(0 0 34px rgba(212, 175, 55, 0.26));
+            }
+            100% {
+              filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.14));
+            }
+          }
+        `}</style>
+      </div>
+    </main>
   );
 }
