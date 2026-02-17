@@ -1,0 +1,12 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/availability/route": "/api/availability",
+  "/api/bookings/route": "/api/bookings",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/",
+  "/stylists/[stylistId]/book/page": "/stylists/[stylistId]/book",
+  "/stylists/[stylistId]/page": "/stylists/[stylistId]",
+  "/stylists/page": "/stylists",
+  "/test/page": "/test"
+}

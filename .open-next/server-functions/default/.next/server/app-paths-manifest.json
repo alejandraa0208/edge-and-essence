@@ -1,0 +1,12 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/availability/route": "app/api/availability/route.js",
+  "/api/bookings/route": "app/api/bookings/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js",
+  "/stylists/[stylistId]/book/page": "app/stylists/[stylistId]/book/page.js",
+  "/stylists/[stylistId]/page": "app/stylists/[stylistId]/page.js",
+  "/stylists/page": "app/stylists/page.js",
+  "/test/page": "app/test/page.js"
+}

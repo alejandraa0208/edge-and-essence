@@ -1,0 +1,15 @@
+module.exports=[93695,(a,b,c)=>{b.exports=a.x("next/dist/shared/lib/no-fallback-error.external.js",()=>require("next/dist/shared/lib/no-fallback-error.external.js"))},50645,a=>{a.n(a.i(27572))},43619,a=>{a.n(a.i(79962))},13718,a=>{a.n(a.i(85523))},18198,a=>{a.n(a.i(45518))},62212,a=>{a.n(a.i(66114))},41250,a=>{"use strict";a.s(["default",()=>b]);let b=(0,a.i(11857).registerClientReference)(function(){throw Error("Attempted to call the default export of [project]/src/app/stylists/[stylistId]/book/BookingForm.tsx <module evaluation> from the server, but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.")},"[project]/src/app/stylists/[stylistId]/book/BookingForm.tsx <module evaluation>","default")},603,a=>{"use strict";a.s(["default",()=>b]);let b=(0,a.i(11857).registerClientReference)(function(){throw Error("Attempted to call the default export of [project]/src/app/stylists/[stylistId]/book/BookingForm.tsx from the server, but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.")},"[project]/src/app/stylists/[stylistId]/book/BookingForm.tsx","default")},91662,a=>{"use strict";a.i(41250);var b=a.i(603);a.n(b)},3602,a=>{"use strict";var b=a.i(7997),c=a.i(95936);a.i(70396);var d=a.i(73727),e=a.i(89711),f=a.i(91662);async function g({params:a}){let{stylistId:g}=await a,h=(0,e.supabaseServerPublic)(),{data:i,error:j}=await h.from("stylists").select("id, display_name, is_active").eq("id",g).single();(j||!i||!1===i.is_active)&&(0,d.notFound)();let{data:k,error:l}=await h.from("stylist_services").select(`
+      service_id,
+      price_cents,
+      deposit_cents,
+      duration_minutes,
+      pricing_note,
+      services:service_id (
+        id,
+        name,
+        category,
+        duration_minutes
+      )
+    `).eq("stylist_id",g).eq("is_active",!0);if(l)return(0,b.jsx)("main",{style:{padding:24},children:(0,b.jsxs)("p",{style:{color:"red"},children:["Error loading services: ",l.message]})});let m=(k??[]).map(a=>{var b;let c=(b=a.services)?Array.isArray(b)?b[0]??null:b:null;return c?{id:c.id,name:c.name,category:c.category??null,duration_minutes:a.duration_minutes??c.duration_minutes??0,price_cents:a.price_cents??null,deposit_cents:a.deposit_cents??null,pricing_note:a.pricing_note??null}:null}).filter(a=>null!==a).sort((a,b)=>{let c=(a.category??"Other").toLowerCase(),d=(b.category??"Other").toLowerCase();return c!==d?c.localeCompare(d):a.name.localeCompare(b.name)});return(0,b.jsxs)("main",{style:{padding:24,maxWidth:900,margin:"0 auto"},children:[(0,b.jsxs)(c.default,{href:`/stylists/${g}`,style:{textDecoration:"none"},children:["← Back to ",i.display_name]}),(0,b.jsx)(f.default,{stylistId:g,stylistName:i.display_name,services:m}),0===m.length?(0,b.jsx)("p",{style:{marginTop:16,color:"#6b7280"},children:"This stylist doesn’t have services assigned yet."}):null]})}a.s(["default",()=>g])}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__6e2e223f._.js.map
