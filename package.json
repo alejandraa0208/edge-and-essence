@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "build:cf": "opennextjs-cloudflare build",
-    "deploy": "opennextjs-cloudflare deploy"
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^5.6.0",
-    "@stripe/stripe-js": "^8.7.0",
+    "@stripe/react-stripe-js": "^5.6.1",
+    "@stripe/stripe-js": "^8.9.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.0",
     "next": "^16.1.6",
@@ -30,6 +31,6 @@
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "^4.65.0"
+    "wrangler": "^4.66.0"
   }
 }

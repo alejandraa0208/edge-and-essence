@@ -1,10 +1,16 @@
 import type { OpenNextConfig } from "@opennextjs/cloudflare";
 
 const config: OpenNextConfig = {
-  // Disable incremental cache on R2 to avoid permissions issues
-  incrementalCache: {
-    disable: true,
-  },
+    default: {
+        override: {
+            wrapper: "cloudflare-node",
+            converter: "edge",
+            proxyExternalRequest: "fetch",
+            tagCache: "dummy",
+            incrementalCache: "dummy",
+            queue: "dummy",
+        },
+    },
 };
 
 export default config;
