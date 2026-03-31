@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-type ActionType = "cancel" | "no_show" | "mark_remaining_paid";
+type ActionType = "confirm" | "cancel" | "no_show" | "mark_remaining_paid";
 
 function getEffectiveDepositPaidCents(booking: {
   paid_deposit_cents: number | null;
@@ -79,6 +79,24 @@ export async function POST(req: Request) {
     const hoursUntilAppointment =
       startAt ? (startAt.getTime() - now.getTime()) / (1000 * 60 * 60) : null;
 
+    // ── Confirm ──────────────────────────────────────────────────────────────
+    if (action === "confirm") {
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({ status: "confirmed" })
+        .eq("id", bookingId);
+
+      if (updateError) {
+        return NextResponse.json(
+          { error: "Failed to confirm booking", details: updateError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ ok: true, action });
+    }
+
+    // ── Cancel ───────────────────────────────────────────────────────────────
     if (action === "cancel") {
       const isLateCancel =
         hoursUntilAppointment !== null &&
@@ -86,8 +104,7 @@ export async function POST(req: Request) {
         hoursUntilAppointment >= 0;
 
       const cancellationReason = isLateCancel
-        ? reason?.trim() ||
-          "Late cancellation within 24 hours. Remaining balance is due."
+        ? reason?.trim() || "Late cancellation within 24 hours. Remaining balance is due."
         : reason?.trim() || "Cancelled by admin";
 
       const { error: updateError } = await supabase
@@ -117,14 +134,14 @@ export async function POST(req: Request) {
       });
     }
 
+    // ── No Show ───────────────────────────────────────────────────────────────
     if (action === "no_show") {
       const { error: updateError } = await supabase
         .from("bookings")
         .update({
           status: "no_show",
           canceled_at: now.toISOString(),
-          cancellation_reason:
-            reason?.trim() || "No-show. Remaining balance is due.",
+          cancellation_reason: reason?.trim() || "No-show. Remaining balance is due.",
           late_cancel: true,
           cancellation_fee_cents: remainingBalance,
           cancellation_policy_applied: true,
@@ -147,6 +164,7 @@ export async function POST(req: Request) {
       });
     }
 
+    // ── Mark Remaining Paid ───────────────────────────────────────────────────
     if (action === "mark_remaining_paid") {
       if (remainingBalance <= 0) {
         return NextResponse.json({
@@ -184,9 +202,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown server error";
-
+    const message = error instanceof Error ? error.message : "Unknown server error";
     return NextResponse.json(
       { error: "Server error", details: message },
       { status: 500 }
