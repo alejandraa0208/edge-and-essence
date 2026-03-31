@@ -21,6 +21,9 @@ type CreateBookingBody = {
   totalCents?: number | null;
   reminderPreference?: "email" | "text" | "both" | "none";
   reminderOptIn?: boolean;
+  reminder24h?: boolean;
+  reminder2h?: boolean;
+  noShowConsent?: boolean;
 };
 
 type ServiceRow = {
@@ -79,14 +82,14 @@ export async function POST(req: Request) {
       totalCents = null,
       reminderPreference = "email",
       reminderOptIn = true,
+      reminder24h = true,
+      reminder2h = true,
+      noShowConsent = false,
     } = body;
 
     if (!stylistId || !serviceId || !dayDate || !startTime) {
       return NextResponse.json(
-        {
-          error:
-            "Missing required fields: stylistId, serviceId, dayDate, startTime",
-        },
+        { error: "Missing required fields: stylistId, serviceId, dayDate, startTime" },
         { status: 400 }
       );
     }
@@ -154,6 +157,9 @@ export async function POST(req: Request) {
         confirmation_code: confirmationCode,
         reminder_preference: reminderPreference,
         reminder_opt_in: reminderOptIn,
+        reminder_24h: reminder24h,
+        reminder_2h: reminder2h,
+        noshow_consent: noShowConsent,
         reminder_phone: clientPhone ?? "",
         reminder_email: clientEmail ?? "",
       })
@@ -170,11 +176,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, booking });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
-
     return NextResponse.json(
       { error: "failed to create booking", details: message },
       { status: 500 }
     );
   }
 }
-
