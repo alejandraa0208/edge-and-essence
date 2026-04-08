@@ -22,6 +22,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/api/bookings/[bookingId]",
+      "regex": "^/api/bookings/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPbookingId": "nxtPbookingId"
+      },
+      "namedRegex": "^/api/bookings/(?<nxtPbookingId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/stylists/[stylistId]",
       "regex": "^/stylists/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -58,6 +66,36 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/bookings",
+      "regex": "^/admin/bookings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/bookings(?:/)?$"
+    },
+    {
+      "page": "/admin/bookings/confirmed",
+      "regex": "^/admin/bookings/confirmed(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/bookings/confirmed(?:/)?$"
+    },
+    {
+      "page": "/admin/bookings/update-status",
+      "regex": "^/admin/bookings/update\\-status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/bookings/update\\-status(?:/)?$"
+    },
+    {
+      "page": "/api/admin/bookings/list",
+      "regex": "^/api/admin/bookings/list(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/bookings/list(?:/)?$"
+    },
+    {
       "page": "/api/availability",
       "regex": "^/api/availability(?:/)?$",
       "routeKeys": {},
@@ -68,6 +106,48 @@
       "regex": "^/api/bookings(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/bookings(?:/)?$"
+    },
+    {
+      "page": "/api/bookings/cancel",
+      "regex": "^/api/bookings/cancel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/bookings/cancel(?:/)?$"
+    },
+    {
+      "page": "/api/bookings/create",
+      "regex": "^/api/bookings/create(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/bookings/create(?:/)?$"
+    },
+    {
+      "page": "/api/cron",
+      "regex": "^/api/cron(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron(?:/)?$"
+    },
+    {
+      "page": "/api/jobs/process-no-show-charges",
+      "regex": "^/api/jobs/process\\-no\\-show\\-charges(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/jobs/process\\-no\\-show\\-charges(?:/)?$"
+    },
+    {
+      "page": "/api/jobs/send-reminders",
+      "regex": "^/api/jobs/send\\-reminders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/jobs/send\\-reminders(?:/)?$"
+    },
+    {
+      "page": "/api/stripe/create-payment-intent",
+      "regex": "^/api/stripe/create\\-payment\\-intent(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/stripe/create\\-payment\\-intent(?:/)?$"
+    },
+    {
+      "page": "/api/stripe/webhook",
+      "regex": "^/api/stripe/webhook(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/stripe/webhook(?:/)?$"
     },
     {
       "page": "/favicon.ico",

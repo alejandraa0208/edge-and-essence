@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AdminBookingActions from "./AdminBookingActions";
+import CalendarView from "./CalendarView";
 
 type RawBookingRow = {
   id: string;
@@ -45,6 +46,8 @@ type BookingRow = {
   cancellation_fee_cents: number | null;
   stylist: { id: string; display_name: string } | null;
 };
+
+type Tab = "overview" | "bookings" | "calendar";
 
 function formatMoney(cents: number | null | undefined) {
   if (cents == null) return "—";
@@ -171,22 +174,56 @@ function stripePill(status: string | null | undefined) {
   );
 }
 
+function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  const tabs: { id: Tab; label: string; icon: string }[] = [
+    { id: "overview", label: "Overview", icon: "📊" },
+    { id: "bookings", label: "All Bookings", icon: "📋" },
+    { id: "calendar", label: "Calendar", icon: "📅" },
+  ];
+  return (
+    <div style={{ display: "flex", gap: 4, marginTop: 24, borderBottom: "1px solid #1e293b", paddingBottom: 0 }}>
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => onChange(t.id)}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "10px 10px 0 0",
+            border: "1px solid",
+            borderColor: active === t.id ? "#1e293b" : "transparent",
+            borderBottom: active === t.id ? "1px solid #0b1220" : "1px solid transparent",
+            background: active === t.id ? "#0b1220" : "transparent",
+            color: active === t.id ? "#f1f5f9" : "#64748b",
+            fontWeight: active === t.id ? 900 : 700,
+            fontSize: 14,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            marginBottom: -1,
+            transition: "all 0.15s",
+          }}
+        >
+          <span>{t.icon}</span>
+          <span>{t.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   async function loadBookings() {
     try {
       setLoading(true);
       setError(null);
-
-      // ← FIXED: was "/api/admin/bookings/list"
-      const res = await fetch("/api/admin/bookings", {
-        method: "GET",
-        cache: "no-store",
-      });
-
+      const res = await fetch("/api/admin/bookings/list", { method: "GET", cache: "no-store" });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Failed to load bookings");
       setBookings(normalizeBookings(json.bookings));
@@ -197,14 +234,12 @@ export default function AdminBookingsPage() {
     }
   }
 
-  useEffect(() => {
-    loadBookings();
-  }, []);
+  useEffect(() => { loadBookings(); }, []);
 
   const todaysBookings = useMemo(() => bookings.filter((b) => isToday(b.start_at)), [bookings]);
   const upcomingBookings = useMemo(() =>
     bookings.filter((b) => isFuture(b.start_at))
-      .sort((a, b) => (new Date(a.start_at ?? 0).getTime()) - (new Date(b.start_at ?? 0).getTime()))
+      .sort((a, b) => new Date(a.start_at ?? 0).getTime() - new Date(b.start_at ?? 0).getTime())
       .slice(0, 8),
     [bookings]
   );
@@ -215,142 +250,186 @@ export default function AdminBookingsPage() {
 
   return (
     <main style={{ padding: 24 }}>
-      <h1 style={{ fontSize: 36, fontWeight: 900, margin: 0 }}>Salon Command Center</h1>
-      <p style={{ opacity: 0.75, marginTop: 8 }}>Edge & Essence admin bookings overview</p>
-
-      {loading && <div style={{ marginTop: 20, opacity: 0.75 }}>Loading bookings...</div>}
-
-      {error && (
-        <div style={{ marginTop: 20, padding: 14, border: "1px solid #7f1d1d", borderRadius: 12, color: "#fecaca", background: "#1f1111" }}>
-          Failed to load bookings: {error}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0 }}>Salon Command Center</h1>
+          <p style={{ opacity: 0.55, marginTop: 4, margin: "4px 0 0 0", fontSize: 14 }}>Edge & Essence · Phoenix, AZ</p>
         </div>
-      )}
+        <button
+          type="button"
+          onClick={loadBookings}
+          style={{ padding: "9px 16px", borderRadius: 10, border: "1px solid #1e293b", background: "transparent", color: "inherit", fontWeight: 800, fontSize: 13, cursor: "pointer" }}
+        >
+          ↻ Refresh
+        </button>
+      </div>
 
-      {!loading && !error && (
-        <>
-          <section style={{ marginTop: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
-            <StatCard label="Today's Appointments" value={String(todaysBookings.length)} subtext="Appointments scheduled today" />
-            <StatCard label="Today's Projected Revenue" value={formatMoney(todaysProjectedRevenue)} subtext="Based on today's bookings" />
-            <StatCard label="Deposits Collected Today" value={formatMoney(todaysDepositsCollected)} subtext="Paid deposit total" />
-            <StatCard label="Pending Bookings" value={String(pendingBookingsCount)} subtext="Need attention" />
-            <StatCard label="Confirmed Bookings" value={String(confirmedBookingsCount)} subtext="Already secured" />
-          </section>
+      <TabBar active={activeTab} onChange={setActiveTab} />
 
-          <section style={{ marginTop: 24, display: "grid", gridTemplateColumns: "1.1fr 2fr", gap: 18 }}>
-            <div style={{ border: "1px solid #334155", borderRadius: 16, padding: 18, minHeight: 240 }}>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900 }}>Upcoming Bookings</h2>
-              <p style={{ marginTop: 8, opacity: 0.7 }}>Next {upcomingBookings.length} upcoming appointments</p>
-              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                {upcomingBookings.length === 0 ? (
-                  <div style={{ opacity: 0.7 }}>No upcoming bookings.</div>
-                ) : (
-                  upcomingBookings.map((b) => (
-                    <div key={b.id} style={{ border: "1px solid #263244", borderRadius: 12, padding: 12, background: "#0b1220" }}>
-                      <div style={{ fontWeight: 900 }}>{cleanServiceSummary(b.service_summary)}</div>
-                      <div style={{ marginTop: 4, opacity: 0.8, fontSize: 14 }}>{b.client_name || "—"} • {b.stylist?.display_name || "—"}</div>
-                      <div style={{ marginTop: 4, opacity: 0.7, fontSize: 13 }}>{formatShortDateTime(b.start_at)}</div>
+      <div style={{ marginTop: 24 }}>
+        {loading && <div style={{ opacity: 0.6 }}>Loading bookings...</div>}
+        {error && (
+          <div style={{ padding: 14, border: "1px solid #7f1d1d", borderRadius: 12, color: "#fecaca", background: "#1f1111" }}>
+            Failed to load bookings: {error}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            {/* ── OVERVIEW TAB ── */}
+            {activeTab === "overview" && (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 24 }}>
+                  <StatCard label="Today's Appointments" value={String(todaysBookings.length)} subtext="Scheduled today" accent="#60a5fa" />
+                  <StatCard label="Projected Revenue Today" value={formatMoney(todaysProjectedRevenue)} subtext="Based on today's bookings" accent="#a78bfa" />
+                  <StatCard label="Deposits Collected Today" value={formatMoney(todaysDepositsCollected)} subtext="Paid deposit total" accent="#34d399" />
+                  <StatCard label="Pending" value={String(pendingBookingsCount)} subtext="Need attention" accent="#fbbf24" />
+                  <StatCard label="Confirmed" value={String(confirmedBookingsCount)} subtext="Secured bookings" accent="#86efac" />
+                </div>
+
+                <div style={{ border: "1px solid #1e293b", borderRadius: 16, padding: 20 }}>
+                  <h2 style={{ margin: "0 0 4px 0", fontSize: 18, fontWeight: 900 }}>Upcoming Appointments</h2>
+                  <p style={{ margin: "0 0 16px 0", opacity: 0.55, fontSize: 13 }}>Next {upcomingBookings.length} upcoming</p>
+                  {upcomingBookings.length === 0 ? (
+                    <div style={{ opacity: 0.5, fontSize: 14 }}>No upcoming bookings.</div>
+                  ) : (
+                    <div style={{ display: "grid", gap: 10 }}>
+                      {upcomingBookings.map((b) => (
+                        <div key={b.id} style={{ border: "1px solid #1e293b", borderRadius: 12, padding: "14px 16px", background: "#0b1220", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                          <div>
+                            <div style={{ fontWeight: 900, fontSize: 15 }}>{b.client_name || "—"}</div>
+                            <div style={{ opacity: 0.6, fontSize: 13, marginTop: 2 }}>
+                              {cleanServiceSummary(b.service_summary)} · {b.stylist?.display_name || "—"}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontWeight: 800, fontSize: 14 }}>{formatShortDateTime(b.start_at)}</div>
+                            <div style={{ marginTop: 4 }}>{statusPill(b.status)}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── ALL BOOKINGS TAB ── */}
+            {activeTab === "bookings" && (
+              <div>
+                <div style={{ marginBottom: 14, fontSize: 14, opacity: 0.55 }}>{bookings.length} total bookings</div>
+                {bookings.length === 0 ? (
+                  <div style={{ opacity: 0.5 }}>No bookings found.</div>
+                ) : (
+                  <div style={{ overflowX: "auto", border: "1px solid #1e293b", borderRadius: 14 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1400 }}>
+                      <thead>
+                        <tr style={{ background: "#0f172a" }}>
+                          <th style={thStyle}>Date / Time</th>
+                          <th style={thStyle}>Client</th>
+                          <th style={thStyle}>Service</th>
+                          <th style={thStyle}>Stylist</th>
+                          <th style={thStyle}>Status</th>
+                          <th style={thStyle}>Total</th>
+                          <th style={thStyle}>Deposit</th>
+                          <th style={thStyle}>Paid</th>
+                          <th style={thStyle}>Remaining</th>
+                          <th style={thStyle}>Stripe</th>
+                          <th style={thStyle}>Policy</th>
+                          <th style={thStyle}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bookings.map((b) => {
+                          const remaining = getRemainingBalanceCents(b);
+                          return (
+                            <tr key={b.id} style={{ borderTop: "1px solid #1e293b" }}>
+                              <td style={tdStyle}>
+                                <div style={{ fontWeight: 700 }}>{formatDateTime(b.start_at)}</div>
+                                <div style={{ opacity: 0.5, fontSize: 12, marginTop: 2 }}>ends {formatDateTime(b.end_at)}</div>
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ fontWeight: 800 }}>{b.client_name || "—"}</div>
+                                <div style={{ opacity: 0.6, fontSize: 12, marginTop: 2 }}>{b.client_email || "—"}</div>
+                                <div style={{ opacity: 0.6, fontSize: 12 }}>{b.client_phone || "—"}</div>
+                              </td>
+                              <td style={tdStyle}>{cleanServiceSummary(b.service_summary)}</td>
+                              <td style={tdStyle}>{b.stylist?.display_name ?? "—"}</td>
+                              <td style={tdStyle}>{statusPill(b.status)}</td>
+                              <td style={tdStyle}>{formatMoney(b.total_cents)}</td>
+                              <td style={tdStyle}>{formatMoney(b.deposit_cents)}</td>
+                              <td style={tdStyle}>{formatMoney(getEffectiveDepositPaidCents(b))}</td>
+                              <td style={tdStyle}>{formatMoney(remaining)}</td>
+                              <td style={tdStyle}>{stripePill(b.stripe_payment_status)}</td>
+                              <td style={tdStyle}>
+                                {b.late_cancel ? (
+                                  <div style={{ fontSize: 12, color: "#fca5a5", fontWeight: 800 }}>
+                                    Fee: {formatMoney(b.cancellation_fee_cents)}
+                                  </div>
+                                ) : b.remaining_paid_method ? (
+                                  <div style={{ fontSize: 12, color: "#86efac", fontWeight: 800 }}>
+                                    Paid via {b.remaining_paid_method}
+                                  </div>
+                                ) : (
+                                  <span style={{ opacity: 0.4 }}>—</span>
+                                )}
+                              </td>
+                              <td style={tdStyle}>
+                                <AdminBookingActions bookingId={b.id} status={b.status} remainingCents={remaining} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
-            </div>
+            )}
 
-            <div style={{ border: "1px solid #334155", borderRadius: 16, padding: 18 }}>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900 }}>All Bookings</h2>
-              <p style={{ marginTop: 8, opacity: 0.7 }}>Full booking list with deposits, remaining balances, and actions</p>
-
-              {bookings.length === 0 ? (
-                <div style={{ marginTop: 16, opacity: 0.7 }}>No bookings found.</div>
-              ) : (
-                <div style={{ marginTop: 16, overflowX: "auto", border: "1px solid #334155", borderRadius: 14 }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1500 }}>
-                    <thead>
-                      <tr style={{ background: "#0f172a" }}>
-                        <th style={thStyle}>Date / Time</th>
-                        <th style={thStyle}>Client</th>
-                        <th style={thStyle}>Service</th>
-                        <th style={thStyle}>Stylist</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={thStyle}>Total</th>
-                        <th style={thStyle}>Deposit</th>
-                        <th style={thStyle}>Deposit Paid</th>
-                        <th style={thStyle}>Remaining</th>
-                        <th style={thStyle}>Stripe</th>
-                        <th style={thStyle}>Policy</th>
-                        <th style={thStyle}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {bookings.map((b) => {
-                        const remaining = getRemainingBalanceCents(b);
-                        return (
-                          <tr key={b.id} style={{ borderTop: "1px solid #334155" }}>
-                            <td style={tdStyle}>
-                              <div>{formatDateTime(b.start_at)}</div>
-                              <div style={{ opacity: 0.65, fontSize: 13 }}>Ends: {formatDateTime(b.end_at)}</div>
-                            </td>
-                            <td style={tdStyle}>
-                              <div style={{ fontWeight: 800 }}>{b.client_name || "—"}</div>
-                              <div style={{ opacity: 0.75, fontSize: 13 }}>{b.client_email || "—"}</div>
-                              <div style={{ opacity: 0.75, fontSize: 13 }}>{b.client_phone || "—"}</div>
-                            </td>
-                            <td style={tdStyle}>{cleanServiceSummary(b.service_summary)}</td>
-                            <td style={tdStyle}>{b.stylist?.display_name ?? "—"}</td>
-                            <td style={tdStyle}>{statusPill(b.status)}</td>
-                            <td style={tdStyle}>{formatMoney(b.total_cents)}</td>
-                            <td style={tdStyle}>{formatMoney(b.deposit_cents)}</td>
-                            <td style={tdStyle}>{formatMoney(getEffectiveDepositPaidCents(b))}</td>
-                            <td style={tdStyle}>{formatMoney(remaining)}</td>
-                            <td style={tdStyle}>{stripePill(b.stripe_payment_status)}</td>
-                            <td style={tdStyle}>
-                              {b.late_cancel ? (
-                                <div style={{ fontSize: 13, color: "#fca5a5", fontWeight: 800 }}>
-                                  Late cancel fee due: {formatMoney(b.cancellation_fee_cents)}
-                                </div>
-                              ) : b.remaining_paid_method ? (
-                                <div style={{ fontSize: 13, color: "#86efac", fontWeight: 800 }}>
-                                  Remaining paid via {b.remaining_paid_method}
-                                </div>
-                              ) : (
-                                <span style={{ opacity: 0.7 }}>—</span>
-                              )}
-                            </td>
-                            <td style={tdStyle}>
-                              <AdminBookingActions
-                                bookingId={b.id}
-                                status={b.status}
-                                remainingCents={remaining}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-        </>
-      )}
+            {/* ── CALENDAR TAB ── */}
+            {activeTab === "calendar" && (
+              <CalendarView
+                bookings={bookings.map((b) => ({
+                  id: b.id,
+                  start_at: b.start_at,
+                  end_at: b.end_at,
+                  status: b.status,
+                  client_name: b.client_name,
+                  service_summary: b.service_summary,
+                  total_cents: b.total_cents,
+                  deposit_cents: b.deposit_cents,
+                  paid_deposit_cents: b.paid_deposit_cents,
+                  stripe_payment_status: b.stripe_payment_status,
+                  remaining_paid_cents: b.remaining_paid_cents,
+                  stylist: b.stylist,
+                }))}
+              />
+            )}
+          </>
+        )}
+      </div>
     </main>
   );
 }
 
-function StatCard({ label, value, subtext }: { label: string; value: string; subtext: string }) {
+function StatCard({ label, value, subtext, accent }: {
+  label: string; value: string; subtext: string; accent: string;
+}) {
   return (
-    <div style={{ border: "1px solid #334155", borderRadius: 16, padding: 18, background: "#0b1220" }}>
-      <div style={{ fontSize: 14, opacity: 0.72 }}>{label}</div>
-      <div style={{ marginTop: 10, fontSize: 28, fontWeight: 900 }}>{value}</div>
-      <div style={{ marginTop: 8, fontSize: 13, opacity: 0.65 }}>{subtext}</div>
+    <div style={{ border: "1px solid #1e293b", borderRadius: 14, padding: "18px 20px", background: "#0b1220" }}>
+      <div style={{ fontSize: 12, opacity: 0.55, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</div>
+      <div style={{ marginTop: 10, fontSize: 26, fontWeight: 900, color: accent }}>{value}</div>
+      <div style={{ marginTop: 6, fontSize: 12, opacity: 0.5 }}>{subtext}</div>
     </div>
   );
 }
 
 const thStyle: React.CSSProperties = {
-  textAlign: "left", padding: "14px 16px", fontSize: 14, fontWeight: 900, whiteSpace: "nowrap",
+  textAlign: "left", padding: "12px 14px", fontSize: 13, fontWeight: 900,
+  whiteSpace: "nowrap", opacity: 0.7,
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "14px 16px", verticalAlign: "top", fontSize: 14,
+  padding: "12px 14px", verticalAlign: "top", fontSize: 13,
 };

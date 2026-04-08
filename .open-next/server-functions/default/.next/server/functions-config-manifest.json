@@ -1,4 +1,7 @@
 {
   "version": 1,
-  "functions": {}
+  "functions": {
+    "/api/cron": {},
+    "/api/stripe/webhook": {}
+  }
 }
